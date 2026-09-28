@@ -89,10 +89,10 @@ jobs:
       - name: Verify push token
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.PAT }}
+          GH_TOKEN: ${{ secrets.PAT || github.token }}
         run: |
           if [ -z "$GH_TOKEN" ]; then
-            echo "::error::The PAT secret is not set -- icon PRs cannot be published."
+            echo "::error::No GitHub token is available -- icon PRs cannot be published."
             exit 1
           fi
           # A dry-run push replicates the exact operation that breaks when the
@@ -100,10 +100,10 @@ jobs:
           # /repos permissions field is NOT a reliable substitute -- it reports
           # push=false for fine-grained PATs that can in fact push.
           if ! git push --dry-run "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/preflight-check-${GITHUB_RUN_ID}"; then
-            echo "::error::The PAT cannot push to $GITHUB_REPOSITORY -- it has likely expired or lost 'Contents: write'. Rotate the PAT secret before re-running."
+            echo "::error::The GitHub token cannot push to $GITHUB_REPOSITORY -- it has likely expired or lacks 'Contents: write'. Update repository secrets or workflow permissions before re-running."
             exit 1
           fi
-          echo "PAT verified: push access to $GITHUB_REPOSITORY confirmed"
+          echo "Token verified: push access to $GITHUB_REPOSITORY confirmed"
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -147,7 +147,7 @@ jobs:
         if: steps.fetch-web-icons.outputs.total_hits != '' && steps.fetch-web-icons.outputs.total_hits != '0'
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.PAT }}
+          GH_TOKEN: ${{ secrets.PAT || github.token }}
         run: |
           .github/scripts/publish-icon-pr.sh web "chore: add web-sourced icons"
 

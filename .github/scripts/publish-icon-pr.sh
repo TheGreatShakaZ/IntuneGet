@@ -9,7 +9,7 @@ if [[ ! "$source_name" =~ ^[a-z0-9-]+$ ]]; then
   exit 1
 fi
 if [[ -z "${GH_TOKEN:-}" ]]; then
-  echo "A PAT-backed GH_TOKEN is required so pull-request checks are triggered" >&2
+  echo "A GH_TOKEN is required so icon pull requests can be created and merged" >&2
   exit 1
 fi
 
